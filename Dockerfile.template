@@ -12,10 +12,9 @@ WORKDIR /usr/app
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY src ./src
 COPY balena-run.sh ./
-COPY config.sample.json ./
-
 RUN chmod +x balena-run.sh
-
 CMD ./balena-run.sh
+
+COPY config.sample.json ./
+COPY src ./src
