@@ -9,6 +9,7 @@ def abbrStation(journeyConfig, inputStr):
     return inputStr
 
 def loadDeparturesForStation(journeyConfig, appId, apiKey):
+    print("loadDeparturesForStation()")
     if journeyConfig["departureStation"] == "":
         raise ValueError(
             "Please set the journey.departureStation property in config.json")
@@ -41,6 +42,7 @@ def loadDeparturesForStation(journeyConfig, appId, apiKey):
 
 
 def loadDestinationsForDeparture(journeyConfig, timetableUrl):
+    print("loadDestinationsForDeparture()")
     r = requests.get(url=timetableUrl)
 
     data = r.json()

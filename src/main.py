@@ -81,6 +81,7 @@ def renderCallingAt(draw, width, height):
 
 
 def renderStations(stations):
+    """Return a render function which renders the given list of stations"""
     def drawText(draw, width, height):
         global stationRenderCount, pauseCount
 
@@ -168,7 +169,7 @@ def drawBlankSignage(device, width, height, departureStation):
     rowTwo = snapshot(width, 10, renderDepartureStation(
         departureStation, (width - stationSize[0]) / 2), interval=10)
     rowThree = snapshot(width, 10, renderDots, interval=10)
-    rowTime = snapshot(width, 14, renderTime, interval=1)
+    rowTime = snapshot(width, 14, renderTime, interval=0.25)
 
     if len(virtualViewport._hotspots) > 0:
         for hotspot, xy in virtualViewport._hotspots:
@@ -262,7 +263,7 @@ try:
     config = loadConfig()
 
     serial = spi()
-    device = ssd1322(serial, mode="1", rotate=0)
+    device = ssd1322(serial, mode="1", rotate=2)
     font = makeFont("Dot Matrix Regular.ttf", 10)
     fontBold = makeFont("Dot Matrix Bold.ttf", 10)
     fontBoldTall = makeFont("Dot Matrix Bold Tall.ttf", 10)
