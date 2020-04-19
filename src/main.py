@@ -19,11 +19,13 @@ from luma.core.sprite_system import framerate_regulator
 from open import isRun
 
 def loadConfig():
+    """Read and parse the config file"""
     with open('config.json', 'r') as jsonConfig:
         data = json.load(jsonConfig)
         return data
 
 def makeFont(name, size):
+    """Returns a TrueType font for the given name and size"""
     font_path = os.path.abspath(
         os.path.join(
             os.path.dirname(__file__),
@@ -260,7 +262,7 @@ try:
     config = loadConfig()
 
     serial = spi()
-    device = ssd1322(serial, mode="1", rotate=2)
+    device = ssd1322(serial, mode="1", rotate=0)
     font = makeFont("Dot Matrix Regular.ttf", 10)
     fontBold = makeFont("Dot Matrix Bold.ttf", 10)
     fontBoldTall = makeFont("Dot Matrix Bold Tall.ttf", 10)
