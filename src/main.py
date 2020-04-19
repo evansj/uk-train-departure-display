@@ -291,7 +291,10 @@ try:
 
     while True:
         with regulator:
+            loop_count += 1
             if(timeNow - timeAtStart >= config["refreshTime"]):
+                print("{}: refreshing data, looped {} times since last refresh at {}".format(time.time(), loop_count, timeAtStart))
+                loop_count = 0
                 data = loadData(config["transportApi"], config["journey"])
                 if data[0] == False:
                     virtual = drawBlankSignage(
