@@ -273,7 +273,7 @@ try:
     pauseCount = 0
     loop_count = 0
 
-    regulator = framerate_regulator(fps=30)
+    regulator = framerate_regulator(fps=16.67)
 
     data = loadData(config["transportApi"], config["journey"])
     if data[0] == False:
