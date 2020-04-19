@@ -105,7 +105,7 @@ def renderTime(draw, width, height):
     t = datetime.now().time()
 
     if hoursMinutesWidth == 0:
-        hoursMinutesWidth, h1 = draw.textsize("{}:{}".format(t.hour, t.minute), fontBoldLarge)
+        hoursMinutesWidth, h1 = draw.textsize("00:00", fontBoldLarge)
     if secondsWidth == 0:
         secondsWidth, h2 = draw.textsize(":00", fontBoldTall)
 
