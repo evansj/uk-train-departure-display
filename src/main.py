@@ -101,6 +101,7 @@ def renderStations(stations):
     return drawText
 
 def renderTime(draw, width, height):
+    global hoursMinutesWidth, secondsWidth
     t = datetime.now().time()
 
     if hoursMinutesWidth == 0:
