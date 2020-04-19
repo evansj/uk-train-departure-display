@@ -109,11 +109,10 @@ def renderTime(draw, width, height):
     if secondsWidth == 0:
         secondsWidth, h2 = draw.textsize(":00", fontBoldTall)
 
-    draw.text(((width - hoursMinutesWidth - secondsWidth) / 2, 0), text="{}:{}".format(t.hour, t.minute),
+    draw.text(((width - hoursMinutesWidth - secondsWidth) / 2, 0), text="{:02d}:{:02d}".format(t.hour, t.minute),
               font=fontBoldLarge, fill="yellow")
-    draw.text((((width - hoursMinutesWidth - secondsWidth) / 2) + hoursMinutesWidth, 5), text=":{}".format(t.second),
+    draw.text((((width - hoursMinutesWidth - secondsWidth) / 2) + hoursMinutesWidth, 5), text=":{:02d}".format(t.second),
               font=fontBoldTall, fill="yellow")
-
 
 def renderWelcomeTo(xOffset):
     def drawText(draw, width, height):
