@@ -1,0 +1,83 @@
+{
+  "date": "2020-04-19",
+  "time_of_day": "15:27",
+  "request_time": "2020-04-19T15:27:30+01:00",
+  "station_name": "Banbury",
+  "station_code": "BAN",
+  "departures": {
+      "all": [
+          {
+              "mode": "train",
+              "service": "25530004",
+              "train_uid": "C78635",
+              "platform": "3",
+              "operator": "CH",
+              "operator_name": "Chiltern Railways",
+              "aimed_departure_time": "16:07",
+              "aimed_arrival_time": "16:03",
+              "aimed_pass_time": null,
+              "origin_name": "Birmingham Moor Street",
+              "destination_name": "London Marylebone",
+              "source": "Network Rail",
+              "category": "XX",
+              "service_timetable": {
+                  "id": "http://transportapi.com/v3/uk/train/service/train_uid:C78635/2020-04-19/timetable.json?app_id=APP_ID&app_key=APP_KEY&live=true"
+
+              },
+              "status": "LATE",
+              "expected_arrival_time": "16:03",
+              "expected_departure_time": "16:07",
+              "best_arrival_estimate_mins": 35,
+              "best_departure_estimate_mins": 39
+          },
+          {
+              "mode": "train",
+              "service": "25530004",
+              "train_uid": "C78632",
+              "platform": "3",
+              "operator": "CH",
+              "operator_name": "Chiltern Railways",
+              "aimed_departure_time": "17:04",
+              "aimed_arrival_time": "17:03",
+              "aimed_pass_time": null,
+              "origin_name": "Birmingham Moor Street",
+              "destination_name": "London Marylebone",
+              "source": "Network Rail",
+              "category": "XX",
+              "service_timetable": {
+                  "id": "http://transportapi.com/v3/uk/train/service/train_uid:C78632/2020-04-19/timetable.json?app_id=APP_ID&app_key=APP_KEY&live=true"
+
+              },
+              "status": "ON TIME",
+              "expected_arrival_time": "17:03",
+              "expected_departure_time": "17:04",
+              "best_arrival_estimate_mins": 95,
+              "best_departure_estimate_mins": 96
+          },
+          {
+            "mode": "train",
+            "service": "25530004",
+            "train_uid": "C78632",
+            "platform": "3",
+            "operator": "CH",
+            "operator_name": "Chiltern Railways",
+            "aimed_departure_time": "17:34",
+            "aimed_arrival_time": "17:33",
+            "aimed_pass_time": null,
+            "origin_name": "Birmingham Moor Street",
+            "destination_name": "London Marylebone",
+            "source": "Network Rail",
+            "category": "XX",
+            "service_timetable": {
+                "id": "http://transportapi.com/v3/uk/train/service/train_uid:C78632/2020-04-19/timetable.json?app_id=APP_ID&app_key=APP_KEY&live=true"
+
+            },
+            "status": "ON TIME",
+            "expected_arrival_time": "17:33",
+            "expected_departure_time": "17:34",
+            "best_arrival_estimate_mins": 125,
+            "best_departure_estimate_mins": 126
+        }
+    ]
+  }
+}

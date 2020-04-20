@@ -8,6 +8,7 @@
   },
   "refreshTime": 180,
   "transportApi": {
+    "demo": false,
     "appId": "",
     "apiKey": "",
     "operatingHours": "0-23"

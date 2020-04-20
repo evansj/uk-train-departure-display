@@ -6,7 +6,8 @@ RUN install_packages \
         libopenjp2-7 \
         libfreetype6-dev \
         libjpeg-dev \
-        libtiff5
+        libtiff5 \
+        libraqm-dev
 
 WORKDIR /usr/app
 COPY ./requirements.txt .
