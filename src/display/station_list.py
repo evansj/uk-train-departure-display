@@ -1,26 +1,25 @@
 import time
 
-from datetime import datetime
 from functools import reduce
 from PIL import Image, ImageDraw
 from luma.core.virtual import hotspot
 
 class StationList(hotspot):
     """Render a list of stations"""
-    def __init__(self, width, height, font, destinations=None, interval=0.1):
+    def __init__(self, width, height, font, destinations=None, interval=0.01):
         super().__init__(width, height)
         self.font = font
         self.destinationText = None
         self.image = None
-        self.startPause = 1.0
-        self.endPause = 1.0
-        self.startTime = None
-        self.endTime = None
+        self.startPause = 0.5
+        self.endPause = 0.5
+        self.pausingSince = None
         self.x = -self.width
         self.first_x_pos = -self.width
         self.interval = interval
-        self.last_updated = 0
+        self.last_updated = 0.0
         self.destinations = destinations
+        # self.update_times = []
 
     @property
     def destinations(self):
@@ -41,7 +40,16 @@ class StationList(hotspot):
 
     def should_redraw(self):
         if self.interval:
-            return time.monotonic() - self.last_updated > self.interval
+            now = time.perf_counter()
+            interval = now - self.last_updated
+            should = interval > self.interval
+            return should
+            # if should:
+            #     print("Redrawing after {} updates".format(self.update_times))
+            #     self.update_times = []
+            # else:
+            #     self.update_times.append(interval)
+            # return should
         else:
             return True
 
@@ -65,26 +73,26 @@ class StationList(hotspot):
         visibleText = self.image.crop((self.x, 0, self.image.width, self.image.height))
         # Paste that cropped image onto the screen
         image.paste(visibleText, xy)
-        # print("Pasted image {} into {} at {}".format(visibleText, image, xy))
+        # print("Pasted image {} cropped at x={} into {} at {}".format(visibleText, self.x, image, xy))
         # delete the cropped image we created
         del visibleText
 
+        self.last_updated = time.perf_counter()
+
         # Implement the pause at the start and end of scrolling
-        if self.textSize:
-            now = datetime.today().timestamp()
-            if self.x == self.first_x_pos:
-                if self.startTime:
-                    if now - self.startTime > self.startPause:
-                        self.x += 1
-                        self.startTime = None
-                else:
-                    self.startTime = now
-            elif self.x > self.textSize[0]:
-                if self.endTime:
-                    if now - self.endTime > self.endPause:
-                        self.x = self.first_x_pos
-                        self.endTime = None
-                else:
-                    self.endTime = now
+        if self.x == self.first_x_pos:
+            if self.pausingSince:
+                if self.last_updated - self.pausingSince > self.startPause:
+                    self.x += 1
+                    self.pausingSince = None
             else:
-                self.x += 1
+                self.pausingSince = self.last_updated
+        elif self.x > self.textSize[0]:
+            if self.pausingSince:
+                if self.last_updated - self.pausingSince > self.endPause:
+                    self.x = self.first_x_pos
+                    self.pausingSince = None
+            else:
+                self.pausingSince = self.last_updated
+        else:
+            self.x += 1

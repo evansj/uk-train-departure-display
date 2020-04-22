@@ -96,7 +96,7 @@ class Clock(hotspot):
         minutes = [int(digit) for digit in str("{:02d}".format(t.minute))]
         seconds = [int(digit) for digit in str("{:02d}".format(t.second))]
 
-        # Calculate x pos of first hour digit
+        # All of the images we are going to draw to the display
         clockChars = [
             self.cachedLargeDigits[hours[0]],
             self.cachedLargeDigits[hours[1]],

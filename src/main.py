@@ -64,7 +64,7 @@ try:
     signage = None
 
     # loop timing
-    # start_time = datetime.today().timestamp()
+    start_time = datetime.today().timestamp()
 
     while True:
         with regulator:
@@ -84,12 +84,12 @@ try:
                 signage.update(data)
 
             virtualViewport.refresh()
-        # time_now = datetime.today().timestamp()
-        # time_diff = time_now - start_time
-        # if time_diff > 10:
+        time_now = datetime.today().timestamp()
+        time_diff = time_now - start_time
+        if time_diff > 10:
             # at least 10 seconds have elapsed
             # print("FPS {}".format(regulator.effective_FPS()))
-            # start_time = time_now
+            start_time = time_now
 
 except KeyboardInterrupt:
     pass

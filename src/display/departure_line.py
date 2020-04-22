@@ -35,38 +35,41 @@ class DepartureLine(hotspot):
         self.status(departure)
         self.platform(departure)
         self.destination(departure)
-        self.dirty = True
 
     def status(self, departure):
+        text = None
         if departure:
             if departure["status"] == "CANCELLED":
-                self.statusText = "Cancelled"
+                text = "Cancelled"
             else:
                 if departure["aimed_departure_time"] == departure["expected_departure_time"]:
-                    self.statusText = "On time"
+                    text = "On time"
                 elif isinstance(departure["expected_departure_time"], str):
-                    self.statusText = 'Exp ' + departure["expected_departure_time"]
-                else:
-                    self.statusText = "."
-        else:
-            self.statusText = None
+                    text = 'Exp ' + departure["expected_departure_time"]
+        if text != self.statusText:
+            self.statusText = text
+            self.dirty = True
 
     def platform(self, departure):
+        text = None
         if departure:
             if departure["mode"] == "bus":
-                self.platformText = "BUS"
+                text = "BUS"
             else:
-                self.platformText = "Plat " + departure["platform"]
-        else:
-            self.platformText = None
+                text = "Plat " + departure["platform"]
+        if text != self.platformText:
+            self.platformText = text
+            self.dirty = True
 
     def destination(self, departure):
+        text = None
         if departure:
             departureTime = departure["aimed_departure_time"]
             destinationName = departure["destination_name"]
-            self.destinationText = f"{departureTime}  {destinationName}"
-        else:
-            self.destinationText = None
+            text = f"{departureTime}  {destinationName}"
+        if text != self.destinationText:
+            self.destinationText = text
+            self.dirty = True
 
     def should_redraw(self):
         return self.dirty
@@ -85,7 +88,7 @@ class DepartureLine(hotspot):
                 (0, 0),
                 text=self.destinationText,
                 font=self.fontBold if self.bold else self.font,
-                width = self.width - self.statusWidth - self.platformWidth,
+                width=self.width - self.statusWidth - self.platformWidth,
                 fill="yellow")
         # Platform
         if self.platformText:
@@ -94,7 +97,7 @@ class DepartureLine(hotspot):
                 (self.width - self.statusWidth - self.platformWidth, 0),
                 text=self.platformText,
                 font=self.font,
-                width = self.platformWidth,
+                width=self.platformWidth,
                 fill="yellow")
         # Status
         if self.statusText:
@@ -106,6 +109,6 @@ class DepartureLine(hotspot):
                 (x, 0),
                 text=self.statusText,
                 font=self.font,
-                width = self.statusWidth,
+                width=self.statusWidth,
                 fill="yellow")
         self.dirty = False

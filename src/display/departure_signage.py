@@ -23,7 +23,7 @@ class DepartureSignage(Signage):
             self.callingAt.setFixedWidth(draw)
             viewport.add_hotspot(self.callingAt, (0, 12))
 
-            self.station_list = StationList(self.width, self.height, font, None, interval=0.1)
+            self.station_list = StationList(self.width - self.callingAt.width, self.height, font, None, interval=0.02)
             self.station_list.width = self.width - self.callingAt.width
             viewport.add_hotspot(self.station_list, (self.callingAt.width, 12))
 
