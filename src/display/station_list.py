@@ -1,15 +1,25 @@
-from display import HAlign
-from display.static_text import StaticText
-# from PIL import Image, ImageDraw
+import time
 
-class StationList(StaticText):
+from datetime import datetime
+from functools import reduce
+from PIL import Image, ImageDraw
+from luma.core.virtual import hotspot
+
+class StationList(hotspot):
     """Render a list of stations"""
-    def __init__(self, width, height, font, destinations=None, halign=HAlign.LEFT):
-        super().__init__(width, height, font, halign=halign)
+    def __init__(self, width, height, font, destinations=None, interval=0.1):
+        super().__init__(width, height)
+        self.font = font
         self.destinationText = None
         self.image = None
-        self.x = 0
-        self.y = 0
+        self.startPause = 1.0
+        self.endPause = 1.0
+        self.startTime = None
+        self.endTime = None
+        self.x = -self.width
+        self.first_x_pos = -self.width
+        self.interval = interval
+        self.last_updated = 0
         self.destinations = destinations
 
     @property
@@ -23,29 +33,58 @@ class StationList(StaticText):
             destinationText = ", ".join(destinations)
         else:
             destinationText = ""
-        # destinationText = ". . . . . . . . . . . . . . . ."
+
         if self.destinationText != destinationText:
-            self.totalWidth = None
+            self.textSize        = None
+            self.image           = None
             self.destinationText = destinationText
 
     def should_redraw(self):
-        return True
+        if self.interval:
+            return time.monotonic() - self.last_updated > self.interval
+        else:
+            return True
 
-    def update(self, draw):
-        if not self.totalWidth:
-            size = draw.textsize(self.destinationText, self.font)
-            self.totalWidth = size[0]
-        # if not self.image:
-        #     self.image = Image.new(draw.mode, self.size)
-        #     imDraw = ImageDraw.Draw(self.image)
-        #     imDraw.text((0,0), text=self.destinationText, width=self.width, font=self.font, fill="yellow")
-        #     del imDraw
+    def buildCache(self, image):
+        if not self.image:
+            draw = ImageDraw.Draw(image)
+            if not self.textSize:
+                self.textSize = draw.textsize(self.destinationText, self.font)
+                # print("Calculated width {}".format(self.textSize))
+            del draw
+            self.image = Image.new(image.mode, self.textSize)
+            draw = ImageDraw.Draw(self.image)
+            draw.text((0,0), text=self.destinationText, font=self.font, fill="yellow")
+            del draw
+            # print("Created {}".format(self.image))
 
-        pos = (self.x, self.y)
-        # print("\"{}\" at {}".format(self.destinationText, pos))
-        draw.text(pos, text=self.destinationText, width=self.width, font=self.font, fill="yellow")
-        # draw.
-        self.x -= 1
-        if self.x + self.totalWidth < 0:
-            self.x = 0
+    def paste_into(self, image, xy):
+        self.buildCache(image)
 
+        # Crop the visible part of the text from the backing image
+        visibleText = self.image.crop((self.x, 0, self.image.width, self.image.height))
+        # Paste that cropped image onto the screen
+        image.paste(visibleText, xy)
+        # print("Pasted image {} into {} at {}".format(visibleText, image, xy))
+        # delete the cropped image we created
+        del visibleText
+
+        # Implement the pause at the start and end of scrolling
+        if self.textSize:
+            now = datetime.today().timestamp()
+            if self.x == self.first_x_pos:
+                if self.startTime:
+                    if now - self.startTime > self.startPause:
+                        self.x += 1
+                        self.startTime = None
+                else:
+                    self.startTime = now
+            elif self.x > self.textSize[0]:
+                if self.endTime:
+                    if now - self.endTime > self.endPause:
+                        self.x = self.first_x_pos
+                        self.endTime = None
+                else:
+                    self.endTime = now
+            else:
+                self.x += 1

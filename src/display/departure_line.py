@@ -1,25 +1,26 @@
 from display import HAlign
-from display.static_text import StaticText
-from display.service_status import ServiceStatus
-from display.platform import Platform
+from luma.core.virtual import hotspot
 from display.destination import Destination
 
-class DepartureLine(object):
+class DepartureLine(hotspot):
     """
     Render a departure line
 
     HH:MM Destination Station       Plat 88     On time
     """
     def __init__(self, width, height, font, fontBold, departure, bold=False):
-        self.width       = width
-        self.height      = height
+        super().__init__(width, height)
         self.font        = font
         self.fontBold    = fontBold
         self.bold        = bold
-        self.status      = None
-        self.platform    = None
-        self.destination = None
-        self.departure   = departure
+
+        self.statusText      = None
+        self.platformText    = None
+        self.destinationText = None
+        self.statusWidth     = None
+        self.platformWidth   = None
+        self.dirty           = True
+        self.departure       = departure
 
     def __str__(self):
         return "DepartureLine(width={}, height={})".format(self.width, self.height)
@@ -31,41 +32,80 @@ class DepartureLine(object):
     @departure.setter
     def departure(self, departure):
         self.__departure = departure
-        if self.status:
-            self.status.departure = departure
-        if self.platform:
-            self.platform.departure = departure
-        if self.destination:
-            self.destination.departure = departure
+        self.status(departure)
+        self.platform(departure)
+        self.destination(departure)
+        self.dirty = True
 
-    def setViewport(self, viewport, y, draw):
-        self.__viewport = viewport
-        width = viewport.width
-        # print("viewport.width {}".format(width))
+    def status(self, departure):
+        if departure:
+            if departure["status"] == "CANCELLED":
+                self.statusText = "Cancelled"
+            else:
+                if departure["aimed_departure_time"] == departure["expected_departure_time"]:
+                    self.statusText = "On time"
+                elif isinstance(departure["expected_departure_time"], str):
+                    self.statusText = 'Exp ' + departure["expected_departure_time"]
+                else:
+                    self.statusText = "."
+        else:
+            self.statusText = None
 
-        # Create new objects for status, platform and destination
-        status     = ServiceStatus(width, 10, self.font, self.departure)
-        status.setFixedWidth(draw)
-        # print("status.width {}".format(status.width))
-        platform   = Platform(width, 10, self.font, self.departure)
-        platform.setFixedWidth(draw)
-        # print("platform.width {}".format(platform.width))
+    def platform(self, departure):
+        if departure:
+            if departure["mode"] == "bus":
+                self.platformText = "BUS"
+            else:
+                self.platformText = "Plat " + departure["platform"]
+        else:
+            self.platformText = None
 
-        destinationFont = self.fontBold if self.bold else self.font
-        destinationWidth = width - status.width - platform.width - 5
-        # print("destinationWidth {}".format(destinationWidth))
-        destination = Destination(destinationWidth, 10, destinationFont, self.departure)
-        # print("destination.width {}".format(destination.width))
+    def destination(self, departure):
+        if departure:
+            departureTime = departure["aimed_departure_time"]
+            destinationName = departure["destination_name"]
+            self.destinationText = f"{departureTime}  {destinationName}"
+        else:
+            self.destinationText = None
 
-        # print("{} destination {}".format(y, destination.text))
-        # print("{} status {}".format(y, status.text))
-        # print("{} platform {}".format(y, platform.text))
+    def should_redraw(self):
+        return self.dirty
 
-        viewport.add_hotspot(destination, (0, y))
-        viewport.add_hotspot(status, (width - status.width, y))
-        viewport.add_hotspot(platform, (width - status.width - platform.width, y))
+    def update(self, draw):
+        # Calculate some fixed widths
+        if not self.statusWidth:
+            self.statusWidth, h = draw.textsize("Exp 00:00", self.font)
+        if not self.platformWidth:
+            self.platformWidth, h = draw.textsize("Plat 88", self.font)
 
-        # Remember the status, platform and destination for future updates
-        self.status      = status
-        self.platform    = platform
-        self.destination = destination
+        # Destination
+        if self.destinationText:
+            # print("\"{}\" at {}, width={}".format(self.destinationText, (0, 0), self.width - self.statusWidth - self.platformWidth))
+            draw.text(
+                (0, 0),
+                text=self.destinationText,
+                font=self.fontBold if self.bold else self.font,
+                width = self.width - self.statusWidth - self.platformWidth,
+                fill="yellow")
+        # Platform
+        if self.platformText:
+            # print("\"{}\" at {}, width={}".format(self.platformText, (self.width - self.statusWidth - self.platformWidth, 0), self.statusWidth))
+            draw.text(
+                (self.width - self.statusWidth - self.platformWidth, 0),
+                text=self.platformText,
+                font=self.font,
+                width = self.platformWidth,
+                fill="yellow")
+        # Status
+        if self.statusText:
+            # This needs to be right aligned
+            size = draw.textsize(self.statusText, self.font)
+            x = self.width - size[0]
+            # print("\"{}\" at {}, width={}".format(self.statusText, (x, 0), self.statusWidth))
+            draw.text(
+                (x, 0),
+                text=self.statusText,
+                font=self.font,
+                width = self.statusWidth,
+                fill="yellow")
+        self.dirty = False

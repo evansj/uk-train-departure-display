@@ -1,6 +1,4 @@
 class Signage(object):
-    pass
-
     def __init__(self, device, viewport, font, fontBold, fontBoldTall, fontBoldLarge, height=10, tallHeight=14):
         self.stationRenderCount = 0
         self.pauseCount         = 0

@@ -17,7 +17,7 @@ class DataFetcher(object):
         self.appId         = apiConfig["appId"]
         self.apiKey        = apiConfig["apiKey"]
         self.demo          = apiConfig["demo"]
-        self.out_of_hours  = False
+        self.out_of_hours  = None
         self.changed       = False
 
         # These variables contain the data to render
@@ -38,6 +38,7 @@ class DataFetcher(object):
 
             out_of_hours = self.is_out_of_hours()
             if self.out_of_hours != out_of_hours:
+                self.out_of_hours = out_of_hours
                 changed = True
 
             departures, station_name = self.loadDeparturesForStation()
@@ -73,7 +74,7 @@ class DataFetcher(object):
 
     def is_out_of_hours(self):
         runHours = [int(x) for x in self.apiConfig['operatingHours'].split('-')]
-        return not isRun(runHours[0], runHours[1]) == False
+        return isRun(runHours[0], runHours[1]) == False
 
     def loadDeparturesForStation(self):
         print("loadDeparturesForStation() demo={}".format(self.demo))
@@ -92,7 +93,7 @@ class DataFetcher(object):
 
             departureStation = self.journeyConfig["departureStation"]
             if self.out_of_hours:
-                return [], journeyConfig['outOfHoursName']
+                return [], self.journeyConfig['outOfHoursName']
             else:
                 URL = f"http://transportapi.com/v3/uk/train/station/{departureStation}/live.json"
 
