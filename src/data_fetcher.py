@@ -1,6 +1,7 @@
 import threading
 import time
 import requests
+from requests.exceptions import ConnectionError
 import json
 from open import isRun
 
@@ -41,24 +42,26 @@ class DataFetcher(object):
                 self.out_of_hours = out_of_hours
                 changed = True
 
-            departures, station_name = self.loadDeparturesForStation()
-            if len(departures) == 0:
-                destination_stations = []
-            else:
-                destination_stations = self.loadDestinationsForDeparture(departures[0]["service_timetable"]["id"])
+            try:
+                departures, station_name = self.loadDeparturesForStation()
+                if len(departures) == 0:
+                    destination_stations = []
+                else:
+                    destination_stations = self.loadDestinationsForDeparture(departures[0]["service_timetable"]["id"])
 
-            if self.departures != departures:
-                self.departures = departures
-                changed = True
-            if self.station_name != station_name:
-                self.station_name = station_name
-                changed = True
-            if self.destination_stations != destination_stations:
-                self.destination_stations = destination_stations
-                changed = True
+                if self.departures != departures:
+                    self.departures = departures
+                    changed = True
+                if self.station_name != station_name:
+                    self.station_name = station_name
+                    changed = True
+                if self.destination_stations != destination_stations:
+                    self.destination_stations = destination_stations
+                    changed = True
 
-            self.changed = self.changed or changed
-
+                self.changed = self.changed or changed
+            except ValueError as err:
+                print("Error fetching data, will try again next time. {}".format(err))
             time.sleep(self.interval)
 
     def abbrStation(self, inputStr):
@@ -102,9 +105,11 @@ class DataFetcher(object):
                         'calling_at': self.journeyConfig["destinationStation"]}
 
                 print("Fetching online data")
-                r = requests.get(url=URL, params=PARAMS)
-
-                data = r.json()
+                try:
+                    r = requests.get(url=URL, params=PARAMS)
+                    data = r.json()
+                except ConnectionError as err:
+                    raise ValueError("Couldn't fetch data: {0}".format(err))
 
         #apply abbreviations / replacements to station names (long stations names dont look great on layout)
         #see config file for replacement list
@@ -128,8 +133,11 @@ class DataFetcher(object):
                 return []
             else:
                 print("Fetching online data")
-                r = requests.get(url=timetableUrl)
-                data = r.json()
+                try:
+                    r = requests.get(url=timetableUrl)
+                    data = r.json()
+                except ConnectionError as err:
+                    raise ValueError("Couldn't fetch data: {0}".format(err))
 
         #apply abbreviations / replacements to station names (long stations names dont look great on layout)
         #see config file for replacement list
