@@ -54,7 +54,7 @@ try:
     widgetWidth = 256
     widgetHeight = 64
 
-    regulator = framerate_regulator(fps=60)
+    regulator = framerate_regulator(fps=70)
 
     virtualViewport = viewport(device, width=widgetWidth, height=widgetHeight)
 

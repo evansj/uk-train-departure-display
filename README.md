@@ -1,5 +1,13 @@
 # Balena UK Train Departure Display (next train indicator)
 
+Enhanced from the original with:
+
+* smooth pixel-based scrolling
+* 55FPS+ with a Raspberry Pi W
+* Horizontally centered digits in the clock so each digit stays within a fixed cell
+* The display doesn't blank whenever new data is loaded
+* Data refreshed in a background thread
+
 ![](assets/sample.jpeg)
 
 A set of python scripts to display replica near real-time UK railway station departure data on SSD1322-based 256x64 SPI OLED screens. Uses the publicly available [Transport API](https://www.transportapi.com/). This project has been developed and simplified based on the work of [others](#credits) to run on the [balenaCloud](https://balena.io/cloud) platform.
