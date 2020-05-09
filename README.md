@@ -11,6 +11,8 @@ Enhanced from the original with:
 
 ![Animation demo](assets/uk_trains.gif)
 
+NB The gif above stutters a bit, but on the actual hardware it's very smooth.
+
 ![](assets/sample.jpeg)
 
 A set of python scripts to display replica near real-time UK railway station departure data on SSD1322-based 256x64 SPI OLED screens. Uses the publicly available [Transport API](https://www.transportapi.com/). This project has been developed and simplified based on the work of [others](#credits) to run on the [balenaCloud](https://balena.io/cloud) platform.
