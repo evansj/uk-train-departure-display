@@ -1,6 +1,5 @@
 from display import HAlign
 from luma.core.virtual import hotspot
-from display.destination import Destination
 
 class DepartureLine(hotspot):
     """

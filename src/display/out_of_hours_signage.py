@@ -2,10 +2,11 @@ from display.signage import Signage
 from display.static_text import StaticText
 from display.clock import Clock
 from display import HAlign
+from display.animation_mixin import AnimationMixin
 
 from luma.core.render import canvas
 
-class OutOfHoursSignage(Signage):
+class OutOfHoursSignage(AnimationMixin, Signage):
     def __init__(self, device, viewport, font, fontBold, fontBoldTall, fontBoldLarge):
         super().__init__(device, viewport, font, fontBold, fontBoldTall, fontBoldLarge)
 
@@ -24,3 +25,5 @@ class OutOfHoursSignage(Signage):
     def update(self, data):
         departures, destinations, departureStation = data
         self.stationName.text = departureStation
+        # This class doesn't animate so it's always ready to load new data
+        self.end()

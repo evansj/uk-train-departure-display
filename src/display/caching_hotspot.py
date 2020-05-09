@@ -1,4 +1,6 @@
 import time
+import logging
+logger = logging.getLogger(__name__)
 
 from PIL import Image, ImageDraw
 from luma.core.virtual import hotspot
@@ -21,12 +23,14 @@ class CachingHotspot(hotspot):
         if self._text != text:
             self._text = text
             if text:
-                self.buildCache()
+                logger.debug("CachingHotspot calling build_cache() because text has changed")
+                self.build_cache()
             else:
-                self.clearCache()
+                logger.debug("CachingHotspot calling clear_cache() because text=None")
+                self.clear_cache()
 
-    def buildCache(self):
+    def build_cache(self):
         pass
 
-    def clearCache(self):
+    def clear_cache(self):
         pass

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 class Signage(object):
     def __init__(self, device, viewport, font, fontBold, fontBoldTall, fontBoldLarge, height=10, tallHeight=14):
         self.stationRenderCount = 0
@@ -14,7 +17,7 @@ class Signage(object):
 
         if len(viewport._hotspots) > 0:
             for hotspot, xy in viewport._hotspots:
-                print("Removing hotspot {} at location {}".format(hotspot, xy))
+                logger.debug("Removing hotspot {} at location {}".format(hotspot, xy))
                 viewport.remove_hotspot(hotspot, xy)
 
     def update(self, data):

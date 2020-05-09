@@ -7,6 +7,9 @@ Enhanced from the original with:
 * Horizontally centered digits in the clock so each digit stays within a fixed cell
 * The display doesn't blank whenever new data is loaded
 * Data refreshed in a background thread
+* Currently running animation finishes before the screen updates
+
+![Animation demo](assets/uk_trains.gif)
 
 ![](assets/sample.jpeg)
 

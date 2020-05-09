@@ -3,10 +3,14 @@ from display.static_text import StaticText
 from display.departure_line import DepartureLine
 from display.calling_at import CallingAt
 from display.clock import Clock
+from display.animation_mixin import AnimationMixin
 
 from luma.core.render import canvas
 
-class DepartureSignage(Signage):
+import logging
+logger = logging.getLogger(__name__)
+
+class DepartureSignage(AnimationMixin, Signage):
     def __init__(self, device, viewport, font, fontBold, fontBoldTall, fontBoldLarge):
         super().__init__(device, viewport, font, fontBold, fontBoldTall, fontBoldLarge)
 
@@ -54,4 +58,6 @@ class DepartureSignage(Signage):
             except IndexError:
                 departureLine.departure = None
 
+        logger.debug("DepartureSignage updating calling_at.destinations")
         self.calling_at.destinations = destinations
+

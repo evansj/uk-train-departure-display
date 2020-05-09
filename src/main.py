@@ -2,6 +2,11 @@ import os
 import sys
 import time
 import json
+import argparse
+import logging
+logging.basicConfig()
+logging.getLogger('display.calling_at').setLevel(logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
 from timeloop import Timeloop
@@ -14,6 +19,7 @@ from display.static_text import StaticText
 from display.departure_line import DepartureLine
 from display.departure_signage import DepartureSignage
 from display.out_of_hours_signage import OutOfHoursSignage
+from display.animated_viewport import AnimatedViewport
 
 from luma.core.interface.serial import spi
 from luma.oled.device import ssd1322
@@ -39,61 +45,94 @@ def makeFont(name, size):
     )
     return ImageFont.truetype(font_path, size)
 
-try:
-    config = loadConfig()
+def init_argparse() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(usage="%(prog)s [OPTION]")
+    parser.add_argument("-g", "--gif", action='store_true')
+    return parser
 
-    apiConfig = config["transportApi"]
+def main() -> None:
+    parser = init_argparse()
+    args = parser.parse_args()
 
-    serial = spi()
-    device = ssd1322(serial, mode="1", rotate=2)
-    font = makeFont("Dot Matrix Regular.ttf", 10)
-    fontBold = makeFont("Dot Matrix Bold.ttf", 10)
-    fontBoldTall = makeFont("Dot Matrix Bold Tall.ttf", 10)
-    fontBoldLarge = makeFont("Dot Matrix Bold.ttf", 20)
+    try:
 
-    widgetWidth = 256
-    widgetHeight = 64
+        config = loadConfig()
 
-    regulator = framerate_regulator(fps=70)
+        apiConfig = config["transportApi"]
 
-    virtualViewport = viewport(device, width=widgetWidth, height=widgetHeight)
+        font = makeFont("Dot Matrix Regular.ttf", 10)
+        fontBold = makeFont("Dot Matrix Bold.ttf", 10)
+        fontBoldTall = makeFont("Dot Matrix Bold Tall.ttf", 10)
+        fontBoldLarge = makeFont("Dot Matrix Bold.ttf", 20)
 
-    fetcher = DataFetcher(config["journey"], apiConfig, interval=config["refreshTime"])
-    fetcher.start()
+        screenWidth = 256
+        screenHeight = 64
 
-    signage = None
+        regulator = framerate_regulator(fps=70)
 
-    # loop timing
-    start_time = datetime.today().timestamp()
+        if args.gif:
+            from luma.emulator.device import gifanim
+            device = gifanim(width=screenWidth, height=screenHeight, scale=1,
+                mode='RGB', filename='uk_trains.gif')
+        else:
+            serial = spi()
+            device = ssd1322(serial, mode="1", rotate=2)
 
-    while True:
-        with regulator:
-            if fetcher.hasChanged():
-                print("New data received")
-                # Make sure we are displaying the correct signage
-                if fetcher.is_out_of_hours():
-                    if not isinstance(signage, OutOfHoursSignage):
-                        print("out of hours, constructing new OutOfHoursSignage")
-                        signage = OutOfHoursSignage(device, virtualViewport, font, fontBold, fontBoldTall, fontBoldLarge)
-                else:
-                    if not isinstance(signage, DepartureSignage):
-                        print("normal hours, constructing new DepartureSignage")
-                        signage = DepartureSignage(device, virtualViewport, font, fontBold, fontBoldTall, fontBoldLarge)
+        animatedViewport = AnimatedViewport(device, width=screenWidth, height=screenHeight)
 
-                data = (fetcher.departures, fetcher.destination_stations, fetcher.station_name)
-                signage.update(data)
+        fetcher = DataFetcher(config["journey"], apiConfig, interval=config["refreshTime"])
+        fetcher.start()
 
-            virtualViewport.refresh()
-        time_now = datetime.today().timestamp()
-        time_diff = time_now - start_time
-        if time_diff > 10:
-            # at least 10 seconds have elapsed
-            # print("FPS {}".format(regulator.effective_FPS()))
-            start_time = time_now
+        signage = None
 
-except KeyboardInterrupt:
-    pass
-except ValueError as err:
-    print(f"Error: {err}")
-except KeyError as err:
-    print(f"Error: Please ensure the {err} environment variable is set")
+        # loop timing
+        start_time = datetime.today().timestamp()
+
+        cycle_count = 0
+
+        # Wait for the first data to load
+        while not fetcher.ready:
+            time.sleep(0.5)
+
+        while True:
+            with regulator:
+                if fetcher.has_changed:
+                    logger.debug("New data received")
+                    animatedViewport.stop()
+                if animatedViewport.stopped:
+                    logger.debug("Updating signage with new data")
+                    # Make sure we are displaying the correct signage
+                    if fetcher.is_out_of_hours():
+                        if not isinstance(signage, OutOfHoursSignage):
+                            logger.debug("out of hours, constructing new OutOfHoursSignage")
+                            signage = OutOfHoursSignage(device, animatedViewport, font, fontBold, fontBoldTall, fontBoldLarge)
+                    else:
+                        if not isinstance(signage, DepartureSignage):
+                            logger.debug("normal hours, constructing new DepartureSignage")
+                            signage = DepartureSignage(device, animatedViewport, font, fontBold, fontBoldTall, fontBoldLarge)
+
+                    data = (fetcher.departures, fetcher.destination_stations, fetcher.station_name)
+                    signage.update(data)
+                    animatedViewport.run()
+                    if args.gif and cycle_count >= 2:
+                        print("Exiting after {} animation cycles".format(cycle_count))
+                        sys.exit()
+                    cycle_count += 1
+
+                animatedViewport.refresh()
+            time_now = datetime.today().timestamp()
+            time_diff = time_now - start_time
+            if time_diff > 10:
+                # at least 10 seconds have elapsed
+                logger.debug("FPS {}".format(regulator.effective_FPS()))
+                start_time = time_now
+
+    except KeyboardInterrupt:
+        pass
+    except ValueError as err:
+        print(f"Error: {err}")
+    except KeyError as err:
+        print(f"Error: Please ensure the {err} environment variable is set")
+
+if __name__ == "__main__":
+    main()
